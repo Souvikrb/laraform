@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use App\Models\Contact;
 class FormController extends Controller
 {
     /**
@@ -17,16 +17,6 @@ class FormController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -34,7 +24,50 @@ class FormController extends Controller
      */
     public function store(Request $request)
     {
-        print_r($_POST);die;
+        
+        $request->validate([
+            'name'    => 'required',
+            'email'   => 'required',
+            'subject' => 'required',
+            'message' => 'required',
+            'date'    => 'required',
+            'hour'    => 'required',
+            'minute'  => 'required',
+            'type'    => 'required',
+            'file'    => 'mimes:csv,txt,xlx,xls,pdf,doc,docx|max:2048'
+        ]);
+
+
+        $Model = new Contact;
+
+        if($request->file()) {
+            $fileName         = time().'_'.$request->file->getClientOriginalName();
+            $filePath         = $request->file('file')->storeAs('uploads', $fileName, 'public');
+            $filePath         = '/storage/app/public/' . $filePath;
+            $Model->document  = $filePath;
+        }
+
+        $date                 = $request->date;
+        $hour                 = $request->hour;
+        $minute               = $request->minute;
+        $type                 = $request->type;
+        $Model->name          = $request->name;
+        $Model->email         = $request->email;
+        $Model->subject       = $request->subject;
+        $Model->message       = $request->message;
+        $Model->date = date("Y-m-d H:i", strtotime($date.' '.$hour.':'.$minute.' '.$type));
+        $Model->status        = '1';
+        $responce             = $Model->save();
+        if(!$responce){
+            $request->session()->flash('message','Sorry! Something went wrong');
+            $request->session()->flash('status','0');
+        }else{
+            $request->session()->flash('message','Your data is submitted successfully');
+            $request->session()->flash('status','1');
+            
+        }
+        return redirect('/');
+        
     }
 
     /**
