@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\http\Controller\ContactController;
+use App\http\Controllers\FormController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -13,6 +13,6 @@ use App\http\Controller\ContactController;
 |
 */
 
-Route::get('/',[ContactController::class,'index']);
-
+Route::get('/',[FormController::class,'index']);
+Route::post('/add',[FormController::class,'store']);
 
